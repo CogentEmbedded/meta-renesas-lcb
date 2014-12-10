@@ -2,8 +2,8 @@
 
 TMP=`mktemp -d`
 
-unzip -q -d $TMP $1/RCH2M2MMPRDL001_1_5_0_CD_image.zip
-unzip -q -d $TMP $1/RCH2M2MMPRLL001_1_5_0_CD_image.zip
+cp -rf $1/RCH2M2MMPRDL001 $TMP
+cp -rf $1/RCH2M2MMPRLL001 $TMP
 
 KERNEL_MODULES=`find $TMP -name RCH2M2MMPRDL001`
 tar -C $KERNEL_MODULES/fdpm/fdpm-module/files/ -jcf fdpm-kernel.tar.bz2 .
