@@ -1,0 +1,92 @@
+From 703949e495cddefb1762746cf14e5669ea92a0ac Mon Sep 17 00:00:00 2001
+From: Nobuhiro Iwamatsu <nobuhiro.iwamatsu.yj@renesas.com>
+Date: Tue, 4 Nov 2014 09:15:46 +0900
+Subject: [U-boot][PATCH] net: sh-eth: Remove definition of RX_DESC_SIZE and
+ TX_DESC_SIZE
+
+RX_DESC_SIZE and TX_DESC_SIZE mean the size of the data descriptor for sh-eth.
+We can acquire this in sizeof. It is not necessary to define these in define.
+
+Signed-off-by: Nobuhiro Iwamatsu <nobuhiro.iwamatsu.yj@renesas.com>
+Signed-off-by: Nobuhiro Iwamatsu <iwamatsu@nigauri.org>
+---
+ drivers/net/sh_eth.c |   20 ++++++++++++--------
+ drivers/net/sh_eth.h |    2 --
+ 2 files changed, 12 insertions(+), 10 deletions(-)
+
+Index: u-boot-sh.3/drivers/net/sh_eth.c
+===================================================================
+--- u-boot-sh.3.orig/drivers/net/sh_eth.c	2014-12-20 05:00:20.361364746 +0300
++++ u-boot-sh.3/drivers/net/sh_eth.c	2014-12-20 05:00:20.357364746 +0300
+@@ -214,19 +214,21 @@
+ 	struct tx_desc_s *cur_tx_desc;
+ 
+ 	/*
+-	 * Allocate tx descriptors. They must be TX_DESC_SIZE bytes aligned
++	 * Allocate rx descriptors. They must be aligned to size of struct
++	 * tx_desc_s.
+ 	 */
+ 	port_info->tx_desc_malloc = malloc(NUM_TX_DESC *
+ 						 sizeof(struct tx_desc_s) +
+-						 TX_DESC_SIZE - 1);
++						 sizeof(struct tx_desc_s) - 1);
+ 	if (!port_info->tx_desc_malloc) {
+ 		printf(SHETHER_NAME ": malloc failed\n");
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+ 
+-	tmp_addr = (u32) (((int)port_info->tx_desc_malloc + TX_DESC_SIZE - 1) &
+-			  ~(TX_DESC_SIZE - 1));
++	tmp_addr = (u32) (((int)port_info->tx_desc_malloc +
++			  sizeof(struct tx_desc_s) - 1) &
++			  ~(sizeof(struct tx_desc_s) - 1));
+ 	flush_cache_wback(tmp_addr, NUM_TX_DESC * sizeof(struct tx_desc_s));
+ 	/* Make sure we use a P2 address (non-cacheable) */
+ 	port_info->tx_desc_base = (struct tx_desc_s *)ADDR_TO_P2(tmp_addr);
+@@ -266,19 +268,21 @@
+ 	u8 *rx_buf;
+ 
+ 	/*
+-	 * Allocate rx descriptors. They must be RX_DESC_SIZE bytes aligned
++	 * Allocate rx descriptors. They must be aligned to size of struct
++	 * rx_desc_s.
+ 	 */
+ 	port_info->rx_desc_malloc = malloc(NUM_RX_DESC *
+ 						 sizeof(struct rx_desc_s) +
+-						 RX_DESC_SIZE - 1);
++						 sizeof(struct rx_desc_s) - 1);
+ 	if (!port_info->rx_desc_malloc) {
+ 		printf(SHETHER_NAME ": malloc failed\n");
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+ 
+-	tmp_addr = (u32) (((int)port_info->rx_desc_malloc + RX_DESC_SIZE - 1) &
+-			  ~(RX_DESC_SIZE - 1));
++	tmp_addr = (u32) (((int)port_info->rx_desc_malloc +
++			  sizeof(struct rx_desc_s) - 1) &
++			  ~(sizeof(struct rx_desc_s) - 1));
+ 	flush_cache_wback(tmp_addr, NUM_RX_DESC * sizeof(struct rx_desc_s));
+ 	/* Make sure we use a P2 address (non-cacheable) */
+ 	port_info->rx_desc_base = (struct rx_desc_s *)ADDR_TO_P2(tmp_addr);
+Index: u-boot-sh.3/drivers/net/sh_eth.h
+===================================================================
+--- u-boot-sh.3.orig/drivers/net/sh_eth.h	2014-12-20 05:00:20.361364746 +0300
++++ u-boot-sh.3/drivers/net/sh_eth.h	2014-12-20 05:05:12.185364284 +0300
+@@ -63,7 +63,6 @@
+ #else
+ #define TX_DESC_PADDING		4
+ #endif
+-#define TX_DESC_SIZE		(12 + TX_DESC_PADDING)
+ 
+ /* Tx descriptor. We always use 3 bytes of padding */
+ struct tx_desc_s {
+@@ -89,7 +88,6 @@
+ #define RX_DESC_PADDING		4
+ #define RX_BUF_ALIGNE_SIZE	32
+ #endif
+-#define RX_DESC_SIZE		(12 + RX_DESC_PADDING)
+ 
+ /* Rx descriptor. We always use 4 bytes of padding */
+ struct rx_desc_s {

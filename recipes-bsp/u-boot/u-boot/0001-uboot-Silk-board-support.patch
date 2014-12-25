@@ -1,19 +1,26 @@
 From ffb9865c74afe9fc5877aa4a44ea8bc8540abb2a Mon Sep 17 00:00:00 2001
 From: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
-Date: Sat, 6 Dec 2014 03:23:16 +0300
-Subject: [PATCH] Silk board support
+Date: Sat, 20 Dec 2014 03:23:16 +0300
+Subject: [U-boot][PATCH] arm: rmobile: Add SILK board support
+
+SILK is an entry level development board based on R-Car E2 SoC (R8A7794)
+
+This commit supports the following peripherals:
+- SCIF, I2C, Ethernet, QSPI, MMC/SDHI, USB Host
+
+Signed-off-by: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
 
 ---
- board/renesas/silk/Makefile        |  48 ++
- board/renesas/silk/lowlevel_init.S | 111 +++++
- board/renesas/silk/qos.c           | 956 +++++++++++++++++++++++++++++++++++++
- board/renesas/silk/silk.c          | 311 ++++++++++++
- board/renesas/silk/silk.h          |  28 ++
- boards.cfg                         |   1 +
- drivers/mmc/sh_sdhi.c              |   4 +-
- drivers/usb/host/ehci-r8a779x.c    |   2 +
- include/configs/silk.h             | 213 +++++++++
- 9 files changed, 1672 insertions(+), 2 deletions(-)
+ board/renesas/silk/Makefile        |   48 +
+ board/renesas/silk/lowlevel_init.S |   36 +
+ board/renesas/silk/qos.c           |  956 +++++++++++++++++++++++++++++++++++++
+ board/renesas/silk/silk.c          |  301 +++++++++++
+ board/renesas/silk/silk.h          |   28 +
+ boards.cfg                         |    2 
+ drivers/mmc/sh_sdhi.c              |    4 
+ drivers/usb/host/ehci-r8a779x.c    |    2 
+ include/configs/silk.h             |  214 ++++++++
+ 9 files changed, 1589 insertions(+), 2 deletions(-)
  create mode 100644 board/renesas/silk/Makefile
  create mode 100644 board/renesas/silk/lowlevel_init.S
  create mode 100644 board/renesas/silk/qos.c
@@ -21,11 +28,10 @@ Subject: [PATCH] Silk board support
  create mode 100644 board/renesas/silk/silk.h
  create mode 100644 include/configs/silk.h
 
-diff --git a/board/renesas/silk/Makefile b/board/renesas/silk/Makefile
-new file mode 100644
-index 0000000..8594819
---- /dev/null
-+++ b/board/renesas/silk/Makefile
+Index: u-boot-sh.3/board/renesas/silk/Makefile
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/board/renesas/silk/Makefile	2014-12-20 20:10:58.050016236 +0300
 @@ -0,0 +1,48 @@
 +#
 +# board/renesas/silk/Makefile
@@ -75,12 +81,11 @@ index 0000000..8594819
 +sinclude $(obj).depend
 +
 +#########################################################################
-diff --git a/board/renesas/silk/lowlevel_init.S b/board/renesas/silk/lowlevel_init.S
-new file mode 100644
-index 0000000..681b14b
---- /dev/null
-+++ b/board/renesas/silk/lowlevel_init.S
-@@ -0,0 +1,111 @@
+Index: u-boot-sh.3/board/renesas/silk/lowlevel_init.S
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/board/renesas/silk/lowlevel_init.S	2014-12-20 20:07:03.402016607 +0300
+@@ -0,0 +1,36 @@
 +/*
 + * board/renesas/silk/lowlevel_init.S
 + *     This file is silk low level initialize.
@@ -102,101 +107,25 @@ index 0000000..681b14b
 + * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 + */
 +
-+#include <asm-offsets.h>
 +#include <config.h>
-+#include <version.h>
-+#include <common.h>
++#include <linux/linkage.h>
 +
-+	.globl lowlevel_init
-+lowlevel_init:
-+#if 0
-+	mrc	p15, 0, r4, c0, c0, 5	/* mpidr */
-+	orr	r4, r4, r4, lsr #6
-+	and	r4, r4, #7		/* id 0-3 = ca15.0,1,2,3 */
-+
-+	tst	r4, #4
-+	ldreq	r1, =0xf0194000		/* ca15 snoop ctl */
-+	ldrne	r1, =0xf0195000		/* ca7 snoop ctl */
-+	tst	r4, #3
-+	moveq	r0, #3
-+	streq	r0, [r1, #0]		/* ca7.0, ca15.0 */
-+1:	ldr	r0, [r1, #0]		/* all */
-+	tst	r0, #3
-+	beq	1b
-+	ldr	r0, [r1, #0xc]
-+	tst	r0, #1
-+	bne	1b
-+
-+	/* which core is the master? */
-+	ldr	r1, =0xe6188000
-+	ldr	r0, [r1, #0x1c]	/* RESCNT */
-+	tst	r0, #(1<<25)	/* MD8 */
-+	moveq	r0, #4		/* ca7.0 is master */
-+	movne	r0, #0		/* ca15.0 is master */
-+	cmp	r4, r0
-+	beq	do_lowlevel_init	@ CPU ID #0
-+	b	do_cpu_waiting		@ CPU ID #1-#3
-+#endif
-+	b	do_lowlevel_init
-+
-+	.pool
-+
-+/*
-+ * CPU ID #1-#3 come here
-+ */
-+	.align  4
-+do_cpu_waiting:
-+	ldr	r1, =0xe6180000	/* sysc */
-+1:	ldr	r0, [r1, #0x20]	/* sbar */
-+	tst	r0, r0
-+	beq	1b
-+	bx	r0
-+
-+/*
-+ * Only CPU ID #0 comes here
-+ */
-+	.align  4
-+do_lowlevel_init:
-+
-+#if 0
-+	/* surpress wfe if ca15 */
-+	tst	r4, #4
-+	mrceq	p15, 0, r0, c1, c0, 1	/* actlr */
-+	orreq	r0, r0, #(1<<7)
-+	mcreq	p15, 0, r0, c1, c0, 1
-+
-+	/* and set l2 latency */
-+	mrc	p15, 0, r0, c0, c0, 5		@ r0 = MPIDR
-+	and	r0, r0, #0xf00
-+	lsr	r0, r0, #8
-+	tst	r0, #1				@ only need for cluster 0
-+	bne	_exit_init_l2_a15
-+
-+	mrc	p15, 1, r0, c9, c0, 2		@ r0 = L2CTLR
-+	and	r1, r0, #7
-+	cmp	r1, #3				@ has already been set up?
-+	bicne	r0, r0, #0xe7
-+	orrne	r0, r0, #0x83			@ L2CTLR[7:6] + L2CTLR[2:0]
-+	orrne	r0, r0, #0x20			@ L2CTLR[5]
-+	mcrne	p15, 1, r0, c9, c0, 2
-+_exit_init_l2_a15:
-+#endif
-+
++ENTRY(lowlevel_init)
 +	ldr	r3, =(CONFIG_SYS_INIT_SP_ADDR)
 +	sub	sp, r3, #4
 +	str	lr, [sp]
 +
-+	/* initialize system */
 +	bl	s_init
 +
 +	ldr	lr, [sp]
 +	mov	pc, lr
 +	nop
-diff --git a/board/renesas/silk/qos.c b/board/renesas/silk/qos.c
-new file mode 100644
-index 0000000..8697fd8
---- /dev/null
-+++ b/board/renesas/silk/qos.c
++ENDPROC(lowlevel_init)
++	.ltorg
+Index: u-boot-sh.3/board/renesas/silk/qos.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/board/renesas/silk/qos.c	2014-12-20 02:24:12.546490964 +0300
 @@ -0,0 +1,956 @@
 +/*
 + * board/renesas/silk/qos.c
@@ -1154,12 +1083,11 @@ index 0000000..8697fd8
 +	writel(0x00000001, &axi_qos->qosthres2);
 +	writel(0x00000001, &axi_qos->qosqon);
 +}
-diff --git a/board/renesas/silk/silk.c b/board/renesas/silk/silk.c
-new file mode 100644
-index 0000000..ca46833
---- /dev/null
-+++ b/board/renesas/silk/silk.c
-@@ -0,0 +1,311 @@
+Index: u-boot-sh.3/board/renesas/silk/silk.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/board/renesas/silk/silk.c	2014-12-20 20:10:29.802016281 +0300
+@@ -0,0 +1,301 @@
 +/*
 + * board/renesas/silk/silk.c
 + *     This file is silk board support.
@@ -1196,15 +1124,6 @@ index 0000000..ca46833
 +
 +DECLARE_GLOBAL_DATA_PTR;
 +
-+#define PLL0CR		0xE61500D8
-+
-+#define s_init_wait(cnt) \
-+		({	\
-+			volatile u32 i = 0x10000 * cnt;	\
-+			while (i > 0)	\
-+				i--;	\
-+		})
-+
 +void s_init(void)
 +{
 +	struct r8a7794_rwdt *rwdt = (struct r8a7794_rwdt *)RWDT_BASE;
@@ -1214,9 +1133,21 @@ index 0000000..ca46833
 +	writel(0xA5A5A500, &rwdt->rwtcsra);
 +	writel(0xA5A5A500, &swdt->swtcsra);
 +
++#if defined(CONFIG_EXTRAM_BOOT)
 +	/* QoS */
-+#if !(defined(CONFIG_EXTRAM_BOOT))
 +	qos_init();
++#endif
++
++#ifndef CONFIG_DCACHE_OFF
++	/*
++	 * The caches are disabled when ACTLR.SMP is set to 0
++	 * regardless of the value of the SCTLR.C (cache enable bit)
++	 * on Cortex-A7 MPCore
++	 */
++	asm volatile(
++		"mrc	15, 0, r0, c1, c0, 1\n"		/* read ACTLR */
++		"orr	r0, r0, #(1 << 6)\n"		/* set SMP */
++		"mcr	p15, 0, r0, c1, c0, 1\n");	/* write ACTLR */
 +#endif
 +}
 +
@@ -1271,7 +1202,6 @@ index 0000000..ca46833
 +	return 0;
 +}
 +
-+DECLARE_GLOBAL_DATA_PTR;
 +int board_init(void)
 +{
 +	u32 val;
@@ -1323,18 +1253,6 @@ index 0000000..ca46833
 +	gpio_request(GPIO_GP_4_29, NULL);
 +	gpio_direction_output(GPIO_GP_4_26, 1);
 +	gpio_direction_output(GPIO_GP_4_29, 1);
-+
-+	do {
-+		val = readl(0xE6600B0C) & 0xF;
-+	} while (val != 0x2);
-+	writel(0x2, 0xE6600B80);
-+	do {
-+		val = readl(0xE6600A14) & 0x1;
-+	} while (val != 0x0);
-+	writel(0x0, 0xE660012C);
-+
-+	/* wait 5ms */
-+	udelay(5000);
 +
 +	return 0;
 +}
@@ -1410,7 +1328,7 @@ index 0000000..ca46833
 +	i2c_write(0x58, 0x13, 1, &val, 1);
 +}
 +
-+#define TSTR0	4
++#define TSTR0		4
 +#define TSTR0_STR0	0x1
 +
 +enum {
@@ -1471,11 +1389,10 @@ index 0000000..ca46833
 +		       mstptbl[i].r_addr);
 +	}
 +}
-diff --git a/board/renesas/silk/silk.h b/board/renesas/silk/silk.h
-new file mode 100644
-index 0000000..d8835c9
---- /dev/null
-+++ b/board/renesas/silk/silk.h
+Index: u-boot-sh.3/board/renesas/silk/silk.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/board/renesas/silk/silk.h	2014-12-20 02:24:12.546490964 +0300
 @@ -0,0 +1,28 @@
 +/*
 + * board/renesas/silk/silk.h
@@ -1505,23 +1422,24 @@ index 0000000..d8835c9
 +extern void arch_preboot_os(void);
 +
 +extern void qos_init(void);
-diff --git a/boards.cfg b/boards.cfg
-index c198210..3752ac3 100644
---- a/boards.cfg
-+++ b/boards.cfg
-@@ -304,6 +304,7 @@ gose                         arm         armv7       gose                renesas
+Index: u-boot-sh.3/boards.cfg
+===================================================================
+--- u-boot-sh.3.orig/boards.cfg	2014-12-20 02:24:12.550490964 +0300
++++ u-boot-sh.3/boards.cfg	2014-12-20 03:35:08.394484236 +0300
+@@ -304,6 +304,8 @@
  gose_extram                  arm         armv7       gose                renesas        rmobile     gose:EXTRAM_BOOT
  alt                          arm         armv7       alt                 renesas        rmobile
  alt_extram                   arm         armv7       alt                 renesas        rmobile     alt:EXTRAM_BOOT
 +silk                         arm         armv7       silk                renesas        rmobile
++silk_extram                  arm         armv7       silk                renesas        rmobile     silk:EXTRAM_BOOT
  socfpga_cyclone5                arm         armv7          socfpga_cyclone5    altera		    socfpga
  actux1_4_16                  arm         ixp         actux1              -              -           actux1:FLASH2X2
  actux1_4_32                  arm         ixp         actux1              -              -           actux1:FLASH2X2,RAM_32MB
-diff --git a/drivers/mmc/sh_sdhi.c b/drivers/mmc/sh_sdhi.c
-index 947e1be..7e691c8 100644
---- a/drivers/mmc/sh_sdhi.c
-+++ b/drivers/mmc/sh_sdhi.c
-@@ -197,7 +197,7 @@ static void sdhi_sync_reset(struct sdhi_host *host)
+Index: u-boot-sh.3/drivers/mmc/sh_sdhi.c
+===================================================================
+--- u-boot-sh.3.orig/drivers/mmc/sh_sdhi.c	2014-12-20 02:24:12.550490964 +0300
++++ u-boot-sh.3/drivers/mmc/sh_sdhi.c	2014-12-20 02:24:12.546490964 +0300
+@@ -197,7 +197,7 @@
  	if (host->ch < 2)
  		sdhi_writew(host, SDHI_HOST_MODE, 1);	/* 16bit access */
  #elif defined(KOELSCH_SDRAM_BASE) || defined(GOSE_SDRAM_BASE) || \
@@ -1530,7 +1448,7 @@ index 947e1be..7e691c8 100644
  	if (host->ch == 0)
  		sdhi_writew(host, SDHI_HOST_MODE, 1);	/* 16bit access */
  #else
-@@ -668,7 +668,7 @@ int sdhi_mmc_init(unsigned long addr, int ch)
+@@ -668,7 +668,7 @@
  	else
  		host->bus_shift = 0;
  #elif defined(KOELSCH_SDRAM_BASE) || defined(GOSE_SDRAM_BASE) || \
@@ -1539,10 +1457,10 @@ index 947e1be..7e691c8 100644
  	if (ch == 0)
  		host->bus_shift = 1;
  	else
-diff --git a/drivers/usb/host/ehci-r8a779x.c b/drivers/usb/host/ehci-r8a779x.c
-index 344ef1d..e33a5d6 100644
---- a/drivers/usb/host/ehci-r8a779x.c
-+++ b/drivers/usb/host/ehci-r8a779x.c
+Index: u-boot-sh.3/drivers/usb/host/ehci-r8a779x.c
+===================================================================
+--- u-boot-sh.3.orig/drivers/usb/host/ehci-r8a779x.c	2014-12-20 02:24:12.550490964 +0300
++++ u-boot-sh.3/drivers/usb/host/ehci-r8a779x.c	2014-12-20 02:24:12.546490964 +0300
 @@ -30,6 +30,8 @@
  #define PHYS_OFFSET	GOSE_SDRAM_BASE
  #elif defined(ALT_SDRAM_BASE)
@@ -1552,12 +1470,11 @@ index 344ef1d..e33a5d6 100644
  #else
  #error
  #endif
-diff --git a/include/configs/silk.h b/include/configs/silk.h
-new file mode 100644
-index 0000000..29c5b8b
---- /dev/null
-+++ b/include/configs/silk.h
-@@ -0,0 +1,213 @@
+Index: u-boot-sh.3/include/configs/silk.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ u-boot-sh.3/include/configs/silk.h	2014-12-20 05:15:25.977962314 +0300
+@@ -0,0 +1,214 @@
 +/*
 + * include/configs/silk.h
 + *     This file is silk board configuration.
@@ -1592,8 +1509,8 @@ index 0000000..29c5b8b
 +
 +#include <asm/arch/rmobile.h>
 +
-+#define	CONFIG_CMD_EDITENV
-+#define	CONFIG_CMD_SAVEENV
++#define CONFIG_CMD_EDITENV
++#define CONFIG_CMD_SAVEENV
 +#define CONFIG_CMD_MEMORY
 +#define CONFIG_CMD_DFL
 +#define CONFIG_CMD_SDRAM
@@ -1613,11 +1530,12 @@ index 0000000..29c5b8b
 +#define CONFIG_CMD_EXT4_WRITE
 +#define CONFIG_CMD_SF
 +#define CONFIG_CMD_SPI
++#define CONFIG_CMD_CACHE
 +
-+#define	CONFIG_CMDLINE_TAG
-+#define	CONFIG_SETUP_MEMORY_TAGS
-+#define	CONFIG_INITRD_TAG
-+#define	CONFIG_CMDLINE_EDITING
++#define CONFIG_CMDLINE_TAG
++#define CONFIG_SETUP_MEMORY_TAGS
++#define CONFIG_INITRD_TAG
++#define CONFIG_CMDLINE_EDITING
 +
 +#define CONFIG_OF_LIBFDT
 +#define BOARD_LATE_INIT
@@ -1627,7 +1545,7 @@ index 0000000..29c5b8b
 +#define CONFIG_BOOTARGS		""
 +
 +#define CONFIG_VERSION_VARIABLE
-+#undef	CONFIG_SHOW_BOOT_PROGRESS
++#undef  CONFIG_SHOW_BOOT_PROGRESS
 +
 +#define CONFIG_ARCH_CPU_INIT
 +#define CONFIG_DISPLAY_CPUINFO
@@ -1643,13 +1561,13 @@ index 0000000..29c5b8b
 +#else
 +#define CONFIG_SYS_INIT_SP_ADDR		0xE633FFFC
 +#endif
-+#define STACK_AREA_SIZE				0xC000
++#define STACK_AREA_SIZE			0xC000
 +#define LOW_LEVEL_MERAM_STACK	\
 +		(CONFIG_SYS_INIT_SP_ADDR + STACK_AREA_SIZE - 4)
 +
 +/* MEMORY */
-+#define SILK_SDRAM_BASE	0x40000000
-+#define SILK_SDRAM_SIZE	0x40000000
++#define SILK_SDRAM_BASE		0x40000000
++#define SILK_SDRAM_SIZE		0x40000000
 +#define SILK_UBOOT_SDRAM_SIZE	0x20000000
 +
 +#define CONFIG_SYS_LONGHELP
@@ -1663,17 +1581,17 @@ index 0000000..29c5b8b
 +/* SCIF */
 +#define CONFIG_SCIF_CONSOLE
 +#define CONFIG_CONS_SCIF2
-+#define SCIF2_BASE		0xe6e58000
-+#undef	CONFIG_SYS_CONSOLE_INFO_QUIET
-+#undef	CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE
-+#undef	CONFIG_SYS_CONSOLE_ENV_OVERWRITE
++#define SCIF2_BASE	0xe6e58000
++#undef  CONFIG_SYS_CONSOLE_INFO_QUIET
++#undef  CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE
++#undef  CONFIG_SYS_CONSOLE_ENV_OVERWRITE
 +
 +#define CONFIG_SYS_MEMTEST_START	(SILK_SDRAM_BASE)
 +#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_MEMTEST_START + \
 +					 504 * 1024 * 1024)
-+#undef	CONFIG_SYS_SILK_MEMTEST
-+#undef	CONFIG_SYS_MEMTEST_SCRATCH
-+#undef	CONFIG_SYS_LOADS_BAUD_CHANGE
++#undef  CONFIG_SYS_SILK_MEMTEST
++#undef  CONFIG_SYS_MEMTEST_SCRATCH
++#undef  CONFIG_SYS_LOADS_BAUD_CHANGE
 +
 +#define CONFIG_SYS_SDRAM_BASE		(SILK_SDRAM_BASE)
 +#define CONFIG_SYS_SDRAM_SIZE		(SILK_UBOOT_SDRAM_SIZE)
@@ -1713,11 +1631,11 @@ index 0000000..29c5b8b
 +	"bootm_size=0x100000\0" \
 +
 +/* SH Ether */
-+#define	CONFIG_NET_MULTI
++#define CONFIG_NET_MULTI
 +#define CONFIG_SH_ETHER
 +#define CONFIG_SH_ETHER_USE_PORT	0
 +#define CONFIG_SH_ETHER_PHY_ADDR	0x1
-+#define CONFIG_SH_ETHER_PHY_MODE PHY_INTERFACE_MODE_RMII
++#define CONFIG_SH_ETHER_PHY_MODE	PHY_INTERFACE_MODE_RMII
 +#define CONFIG_SH_ETHER_CACHE_WRITEBACK
 +#define CONFIG_SH_ETHER_CACHE_INVALIDATE
 +#define CONFIG_PHYLIB
@@ -1726,8 +1644,8 @@ index 0000000..29c5b8b
 +#define CONFIG_BITBANGMII_MULTI
 +
 +/* Board Clock */
-+#define	CONFIG_SYS_CLK_FREQ	32500000
-+#define	CONFIG_SCIF_CLK_FREQ	14745600
++#define CONFIG_SYS_CLK_FREQ	20000000
++#define CONFIG_SCIF_CLK_FREQ	14745600
 +#define CONFIG_SYS_TMU_CLK_DIV	4
 +#define CONFIG_SYS_HZ		1000
 +
@@ -1767,10 +1685,7 @@ index 0000000..29c5b8b
 +
 +/* USB-ether */
 +#define CONFIG_MII
-+#define CONFIG_USB_HOST_ETHER   /* Enable USB Ethernet adapters */
-+#define CONFIG_USB_ETHER_ASIX   /* Asix, or whatever driver(s) you want */
++#define CONFIG_USB_HOST_ETHER	/* Enable USB Ethernet adapters */
++#define CONFIG_USB_ETHER_ASIX	/* Asix, or whatever driver(s) you want */
 +
-+#endif	/* __SILK_H */
--- 
-1.9.1
-
++#endif /* __SILK_H */

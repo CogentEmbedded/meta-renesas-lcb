@@ -1,7 +1,11 @@
 From f04a201ce9bfc04ca4b8b017116ca1cf9a313c9a Mon Sep 17 00:00:00 2001
 From: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
 Date: Sat, 6 Dec 2014 03:29:15 +0300
-Subject: [PATCH] Silk board support
+Subject: [linux-kernel][PATCH] arm: rmobile: Add SILK board support
+
+SILK is an entry level development board based on R-Car E2 SoC (R8A7794)
+
+Signed-off-by: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
 
 ---
  arch/arm/boot/dts/Makefile                    |   1 +
