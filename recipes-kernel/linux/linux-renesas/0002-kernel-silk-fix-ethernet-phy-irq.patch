@@ -1,0 +1,20 @@
+
+Ethernet phy interrupt is connected to IRQ8
+
+---
+ arch/arm/boot/dts/r8a7794-silk.dts |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: renesas-backport.2/arch/arm/boot/dts/r8a7794-silk.dts
+===================================================================
+--- renesas-backport.2.orig/arch/arm/boot/dts/r8a7794-silk.dts	2014-12-28 21:47:38.225827103 +0300
++++ renesas-backport.2/arch/arm/boot/dts/r8a7794-silk.dts	2014-12-28 21:47:38.221827103 +0300
+@@ -280,7 +280,7 @@
+ 	phy1: ethernet-phy@1 {
+ 		reg = <1>;
+ 		interrupt-parent = <&irqc0>;
+-		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
++		interrupts = <8 IRQ_TYPE_LEVEL_LOW>;
+ 		micrel,led-mode = <1>;
+ 	};
+ };

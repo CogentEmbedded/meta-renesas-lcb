@@ -1,0 +1,20 @@
+
+Fix SDHI1 write protect pin detection
+
+---
+ arch/arm/boot/dts/r8a7794-silk.dts |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: renesas-backport.2/arch/arm/boot/dts/r8a7794-silk.dts
+===================================================================
+--- renesas-backport.2.orig/arch/arm/boot/dts/r8a7794-silk.dts	2014-12-28 22:22:47.693823768 +0300
++++ renesas-backport.2/arch/arm/boot/dts/r8a7794-silk.dts	2014-12-28 22:22:47.689823768 +0300
+@@ -345,7 +345,7 @@
+ 	vmmc-supply = <&vcc_sdhi1>;
+ 	vqmmc-supply = <&vccq_sdhi1>;
+ 	cd-gpios = <&gpio6 14 GPIO_ACTIVE_LOW>;
+-	wp-gpios = <&gpio6 15 GPIO_ACTIVE_HIGH>;
++	wp-gpios = <&gpio6 15 GPIO_ACTIVE_LOW>;
+ 	status = "okay";
+ };
+ 
