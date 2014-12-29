@@ -1,0 +1,78 @@
+From ab2c045efcb56df4e9e33ceba755bdac8ce8bf11 Mon Sep 17 00:00:00 2001
+From: Petr Nechaev <petr.nechaev@cogentembedded.com>
+Date: Mon, 29 Dec 2014 11:10:00 +0300
+Subject: [PATCH] Reverted i2c: rcar: Support ACK by HW auto restart after NACK
+
+Reverted:
+
+From 4df6b2af6c0f795d810eb1e2e9411ad1cbbe4245 Mon Sep 17 00:00:00 2001
+From: Ryo Kataoka <ryo.kataoka.wt@renesas.com>
+Date: Tue, 21 Oct 2014 16:26:09 +0900
+Subject: [PATCH 1/2] i2c: rcar: Support ACK by HW auto restart after
+NACK
+
+Even if R-Car I2C received NACK, after that it might receive ACK
+by HW auto restart. In case of that, driver would continue process.
+If R-Car I2C didn't receive ACK, the driver would detect timeout
+and would report NACK as -ENXIO.
+
+Signed-off-by: Ryo Kataoka <ryo.kataoka.wt@renesas.com
+---
+ drivers/i2c/busses/i2c-rcar.c | 20 ++++++++------------
+ 1 file changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-rcar.c b/drivers/i2c/busses/i2c-rcar.c
+index 18034cd..243b246 100644
+--- a/drivers/i2c/busses/i2c-rcar.c
++++ b/drivers/i2c/busses/i2c-rcar.c
+@@ -522,6 +522,7 @@ static irqreturn_t rcar_i2c_irq(int irq, void *ptr)
+ 
+ 		/* go to stop phase */
+ 		rcar_i2c_bus_phase(priv, RCAR_BUS_PHASE_STOP);
++		rcar_i2c_irq_mask(priv, RCAR_IRQ_OPEN_FOR_STOP);
+ 		rcar_i2c_flags_set(priv, ID_NACK);
+ 		rcar_i2c_status_bit_clear(priv, MNR);
+ 		goto out;
+@@ -532,14 +533,8 @@ static irqreturn_t rcar_i2c_irq(int irq, void *ptr)
+ 	 */
+ 	if (msr & MST) {
+ 		dev_dbg(dev, "Stop\n");
+-		if (rcar_i2c_flags_has(priv, ID_NACK)) {
+-			/* don't set ID_DONE for expecting ACK
+-					after auto-restart by HW */
+-			rcar_i2c_status_bit_clear(priv, MST);
+-		} else {
+-			rcar_i2c_flags_set(priv, ID_DONE);
+-			rcar_i2c_status_clear(priv);
+-		}
++		rcar_i2c_flags_set(priv, ID_DONE);
++		rcar_i2c_status_clear(priv);
+ 		goto out;
+ 	}
+ 
+@@ -616,10 +611,6 @@ static int rcar_i2c_master_xfer(struct i2c_adapter *adap,
+ 					     rcar_i2c_flags_has(priv, ID_DONE),
+ 					     5 * HZ);
+ 		if (!timeout) {
+-			if (rcar_i2c_flags_has(priv, ID_NACK)) {
+-				ret = -ENXIO;
+-				break;
+-			}
+ 			ret = -ETIMEDOUT;
+ 			break;
+ 		}
+@@ -627,6 +618,11 @@ static int rcar_i2c_master_xfer(struct i2c_adapter *adap,
+ 		/*
+ 		 * error handling
+ 		 */
++		if (rcar_i2c_flags_has(priv, ID_NACK)) {
++			ret = -ENXIO;
++			break;
++		}
++
+ 		if (rcar_i2c_flags_has(priv, ID_ARBLOST)) {
+ 			ret = -EAGAIN;
+ 			break;
+-- 
+1.9.3
+
