@@ -12,8 +12,8 @@ fi
 
 TMP=`mktemp -d`
 
-cp -rf $1/R-Car_Series_Evaluation_Software_Package_of_Linux_Drivers/mmp_reference_lib_v150_eva/EVARCH2M2MMPRDL001_1_5_0/RCH2M2MMPRDL001 $TMP
-cp -rf $1/R-Car_Series_Evaluation_Software_Package_for_Linux/mmp_reference_lib_m2e2_v150_eva/EVARCH2M2MMPRLL001_1_5_0/RCH2M2MMPRLL001 $TMP
+cp -rf $1/R-Car_Series_Evaluation_Software_Package_of_Linux_Drivers/mmp_reference_lib_v160_eva/EVARCH2M2MMPRDL001_1_6_0/RCH2M2MMPRDL001 $TMP
+cp -rf $1/R-Car_Series_Evaluation_Software_Package_for_Linux/mmp_reference_lib_m2e2_v160_eva/EVARCH2M2MMPRLL001_1_6_0/RCH2M2MMPRLL001 $TMP
 
 KERNEL_MODULES="$TMP/RCH2M2MMPRDL001"
 tar -C $KERNEL_MODULES/fdpm/fdpm-module/files/ -jcf fdpm-kernel.tar.bz2 .
@@ -44,8 +44,8 @@ mv s3ctl.tar.bz2 recipes-multimedia/s3ctl-module/files
 mv vspm.tar.bz2 recipes-multimedia/vspm-module/files/vspm-user.tar.bz2
 
 OMXTMP=`mktemp -d`
-cp -a $1/R-Car_Series_Evaluation_Software_Package_for_Linux/omx_video_m2e2_v150_eva/* $OMXTMP
-cp -a $1/R-Car_Series_Evaluation_Software_Package_of_Linux_Drivers/omx_video_v150_eva/* $OMXTMP
+cp -a $1/R-Car_Series_Evaluation_Software_Package_for_Linux/omx_video_m2e2_v160_eva/* $OMXTMP
+cp -a $1/R-Car_Series_Evaluation_Software_Package_of_Linux_Drivers/omx_video_v160_eva/* $OMXTMP
 
 unzip -q -d $TMP $OMXTMP/EVARTM0AC0000XCMCTL20SL32C.zip
 mv $TMP/EVARTM0AC0000XCMCTL20SL32C $TMP/RTM0AC0000XCMCTL20SL32C
