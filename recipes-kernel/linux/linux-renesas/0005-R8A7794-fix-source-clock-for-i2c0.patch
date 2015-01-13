@@ -1,0 +1,27 @@
+From 3662b5ea05f7827f318f09cf4ae7d8c14aa1a377 Mon Sep 17 00:00:00 2001
+From: Andrey Gusakov <andrey.gusakov@cogentembedded.com>
+Date: Sun, 28 Dec 2014 19:55:27 +0300
+Subject: [PATCH] R8A7794: fix source clock for i2c0
+
+
+Signed-off-by: Andrey Gusakov <andrey.gusakov@cogentembedded.com>
+---
+ arch/arm/boot/dts/r8a7794.dtsi |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/r8a7794.dtsi b/arch/arm/boot/dts/r8a7794.dtsi
+index 73042c8..b495251 100644
+--- a/arch/arm/boot/dts/r8a7794.dtsi
++++ b/arch/arm/boot/dts/r8a7794.dtsi
+@@ -832,7 +832,7 @@
+ 			clocks = <&cp_clk>, <&cp_clk>, <&cp_clk>,
+ 				 <&cp_clk>, <&cp_clk>, <&cp_clk>,
+ 				 <&cpg_clocks R8A7794_CLK_QSPI>, <&hp_clk>, <&hp_clk>,
+-				 <&hp_clk>, <&hp_clk>, <&hp_clk>, <&hp_clk>;
++				 <&hp_clk>, <&hp_clk>, <&hp_clk>, <&hp_clk>, <&hp_clk>;
+ 			#clock-cells = <1>;
+ 			renesas,clock-indices = <
+ 				R8A7794_CLK_GPIO6 R8A7794_CLK_GPIO5 R8A7794_CLK_GPIO4
+-- 
+1.7.10.4
+
