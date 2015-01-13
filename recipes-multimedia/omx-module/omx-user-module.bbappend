@@ -4,9 +4,12 @@ do_install_append() {
 	cd ${S}/OMXR/lib/
 
 	ln -sf libomxr_core.so.0.0.0 libomxr_core.so.2.0.0
+	ln -sf libomxr_core.so.0.0.0 libomxr_core.so.0
 	ln -sf libomxr_mc_cmn.so.0.0.0 libomxr_mc_cmn.so.2.0.0
 	ln -sf libomxr_mc_h264d.so.0.0.0 libomxr_mc_h264d.so.2.0.0
+	ln -sf libomxr_mc_h264d.so.0.0.0 libomxr_mc_h264d.so.0
 	ln -sf libomxr_mc_h264e.so.0.0.0 libomxr_mc_h264e.so.2.0.0
+	ln -sf libomxr_mc_h264e.so.0.0.0 libomxr_mc_h264e.so.0
 	ln -sf libomxr_mc_vecmn.so.0.0.0 libomxr_mc_vecmn.so.2.0.0
 	ln -sf libomxr_mc_vcmn.so.0.0.0 libomxr_mc_vcmn.so.2.0.0
 	ln -sf libomxr_mc_vdcmn.so.0.0.0 libomxr_mc_vdcmn.so.2.0.0
