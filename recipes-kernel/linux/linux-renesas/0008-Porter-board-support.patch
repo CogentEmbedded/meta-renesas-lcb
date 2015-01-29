@@ -10,8 +10,8 @@ Signed-off-by: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
  arch/arm/configs/shmobile_defconfig             |    1 
  arch/arm/mach-shmobile/Kconfig                  |    6 
  arch/arm/mach-shmobile/Makefile                 |    1 
- arch/arm/mach-shmobile/board-porter-reference.c |  952 ++++++++++++++++++++++++
- 6 files changed, 1342 insertions(+)
+ arch/arm/mach-shmobile/board-porter-reference.c |  953 ++++++++++++++++++++++++
+ 6 files changed, 1343 insertions(+)
 
 Index: renesas-backport.v0/arch/arm/boot/dts/Makefile
 ===================================================================
@@ -455,8 +455,8 @@ Index: renesas-backport.v0/arch/arm/mach-shmobile/Makefile
 Index: renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c	2015-01-28 12:21:43.823500578 +0300
-@@ -0,0 +1,952 @@
++++ renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c	2015-01-29 16:34:44.168438327 +0300
+@@ -0,0 +1,953 @@
 +/*
 + * Porter board support - Reference DT implementation
 + *
@@ -484,6 +484,7 @@ Index: renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c
 +#include <linux/mfd/tmio.h>
 +#include <linux/mmc/host.h>
 +#include <linux/mmc/sh_mobile_sdhi.h>
++#include <linux/of_gpio.h>
 +#include <linux/of_platform.h>
 +#include <linux/platform_data/camera-rcar.h>
 +#include <linux/platform_data/rcar-du.h>
