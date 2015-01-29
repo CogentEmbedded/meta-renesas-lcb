@@ -10,5 +10,6 @@ SRC_URI_append = " \
 	file://0005-R8A7794-fix-source-clock-for-i2c0.patch \
 	file://0006-Rcar-DU-add-RGB-connector.patch \
 	file://0007-SILK-add-i2c0.patch \
+	file://0008-Porter-board-support.patch \
 "
 
