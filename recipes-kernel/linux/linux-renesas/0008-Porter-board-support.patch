@@ -1,23 +1,28 @@
-Subject: [linux-kernel][PATCH] arm: rmobile: Add Porter board support
+From c8c4c6ed85b5f34b8f8178b8ce53c246a67cfa00 Mon Sep 17 00:00:00 2001
+From: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
+Date: Mon, 2 Feb 2015 14:12:24 +0300
+Subject: [PATCH] Add Porter board support
 
-Porter is an entry level development board based on R-Car M2 SoC (R8A7791)
+Porter is an entry level development board based on R-Car M2 SoC
+(R8A7791)
 
 Signed-off-by: Vladimir Barinov <vladimir.barinov@cogentembedded.com>
-
 ---
- arch/arm/boot/dts/Makefile                      |    1 
- arch/arm/boot/dts/r8a7791-porter.dts            |  385 +++++++++
- arch/arm/configs/shmobile_defconfig             |    1 
- arch/arm/mach-shmobile/Kconfig                  |    6 
- arch/arm/mach-shmobile/Makefile                 |    1 
- arch/arm/mach-shmobile/board-porter-reference.c |  953 ++++++++++++++++++++++++
+ arch/arm/boot/dts/Makefile                      |   1 +
+ arch/arm/boot/dts/r8a7791-porter.dts            | 385 ++++++++++
+ arch/arm/configs/shmobile_defconfig             |   1 +
+ arch/arm/mach-shmobile/Kconfig                  |   6 +
+ arch/arm/mach-shmobile/Makefile                 |   1 +
+ arch/arm/mach-shmobile/board-porter-reference.c | 953 ++++++++++++++++++++++++
  6 files changed, 1347 insertions(+)
+ create mode 100644 arch/arm/boot/dts/r8a7791-porter.dts
+ create mode 100644 arch/arm/mach-shmobile/board-porter-reference.c
 
-Index: renesas-backport.v0/arch/arm/boot/dts/Makefile
-===================================================================
---- renesas-backport.v0.orig/arch/arm/boot/dts/Makefile	2015-01-28 12:21:43.827500578 +0300
-+++ renesas-backport.v0/arch/arm/boot/dts/Makefile	2015-01-28 12:21:43.819500577 +0300
-@@ -176,6 +176,7 @@
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index f2b99db..a1de751 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -176,6 +176,7 @@ dtb-$(CONFIG_ARCH_SHMOBILE_MULTI) += emev2-kzm9d.dtb \
  	r7s72100-genmai.dtb \
  	r8a7791-henninger.dtb \
  	r8a7791-koelsch.dtb \
@@ -25,10 +30,11 @@ Index: renesas-backport.v0/arch/arm/boot/dts/Makefile
  	r8a7790-lager.dtb \
  	r8a7794-alt.dtb \
  	r8a7794-silk.dtb \
-Index: renesas-backport.v0/arch/arm/boot/dts/r8a7791-porter.dts
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ renesas-backport.v0/arch/arm/boot/dts/r8a7791-porter.dts	2015-01-30 16:09:26.978368020 +0300
+diff --git a/arch/arm/boot/dts/r8a7791-porter.dts b/arch/arm/boot/dts/r8a7791-porter.dts
+new file mode 100644
+index 0000000..6a0ccde
+--- /dev/null
++++ b/arch/arm/boot/dts/r8a7791-porter.dts
 @@ -0,0 +1,385 @@
 +/*
 + * Device Tree Source for the Porter board
@@ -415,11 +421,11 @@ Index: renesas-backport.v0/arch/arm/boot/dts/r8a7791-porter.dts
 +&cpu0 {
 +	cpu0-supply = <&vdd_dvfs>;
 +};
-Index: renesas-backport.v0/arch/arm/configs/shmobile_defconfig
-===================================================================
---- renesas-backport.v0.orig/arch/arm/configs/shmobile_defconfig	2015-01-28 12:21:43.827500578 +0300
-+++ renesas-backport.v0/arch/arm/configs/shmobile_defconfig	2015-01-28 12:21:43.823500578 +0300
-@@ -26,6 +26,7 @@
+diff --git a/arch/arm/configs/shmobile_defconfig b/arch/arm/configs/shmobile_defconfig
+index 11237db..bb4e0e6 100644
+--- a/arch/arm/configs/shmobile_defconfig
++++ b/arch/arm/configs/shmobile_defconfig
+@@ -26,6 +26,7 @@ CONFIG_MACH_GOSE=y
  CONFIG_MACH_ALT=y
  CONFIG_MACH_SILK=y
  CONFIG_MACH_MARZEN=y
@@ -427,11 +433,11 @@ Index: renesas-backport.v0/arch/arm/configs/shmobile_defconfig
  CONFIG_SHMOBILE_TIMER_HZ=100
  CONFIG_ARM_LPAE=y
  # CONFIG_SWP_EMULATE is not set
-Index: renesas-backport.v0/arch/arm/mach-shmobile/Kconfig
-===================================================================
---- renesas-backport.v0.orig/arch/arm/mach-shmobile/Kconfig	2015-01-28 12:21:43.827500578 +0300
-+++ renesas-backport.v0/arch/arm/mach-shmobile/Kconfig	2015-01-29 13:01:08.403014292 +0300
-@@ -93,6 +93,12 @@
+diff --git a/arch/arm/mach-shmobile/Kconfig b/arch/arm/mach-shmobile/Kconfig
+index e2e00a9..7c15245 100644
+--- a/arch/arm/mach-shmobile/Kconfig
++++ b/arch/arm/mach-shmobile/Kconfig
+@@ -93,6 +93,12 @@ config MACH_MARZEN
  	depends on ARCH_R8A7779
  	select REGULATOR_FIXED_VOLTAGE if REGULATOR
  
@@ -444,11 +450,11 @@ Index: renesas-backport.v0/arch/arm/mach-shmobile/Kconfig
  comment "Renesas ARM SoCs System Configuration"
  endif
  
-Index: renesas-backport.v0/arch/arm/mach-shmobile/Makefile
-===================================================================
---- renesas-backport.v0.orig/arch/arm/mach-shmobile/Makefile	2015-01-28 12:21:43.827500578 +0300
-+++ renesas-backport.v0/arch/arm/mach-shmobile/Makefile	2015-01-28 12:21:43.823500578 +0300
-@@ -78,6 +78,7 @@
+diff --git a/arch/arm/mach-shmobile/Makefile b/arch/arm/mach-shmobile/Makefile
+index 139f31c..43b4025 100644
+--- a/arch/arm/mach-shmobile/Makefile
++++ b/arch/arm/mach-shmobile/Makefile
+@@ -78,6 +78,7 @@ obj-$(CONFIG_MACH_GOSE)		+= board-gose-reference.o
  obj-$(CONFIG_MACH_ALT)		+= board-alt-reference.o
  obj-$(CONFIG_MACH_SILK)		+= board-silk-reference.o
  obj-$(CONFIG_MACH_MARZEN)	+= board-marzen-reference.o
@@ -456,10 +462,11 @@ Index: renesas-backport.v0/arch/arm/mach-shmobile/Makefile
  else
  obj-$(CONFIG_MACH_APE6EVM)	+= board-ape6evm.o
  obj-$(CONFIG_MACH_APE6EVM_REFERENCE)	+= board-ape6evm-reference.o
-Index: renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c	2015-01-30 16:08:05.770369300 +0300
+diff --git a/arch/arm/mach-shmobile/board-porter-reference.c b/arch/arm/mach-shmobile/board-porter-reference.c
+new file mode 100644
+index 0000000..d481ecd
+--- /dev/null
++++ b/arch/arm/mach-shmobile/board-porter-reference.c
 @@ -0,0 +1,953 @@
 +/*
 + * Porter board support - Reference DT implementation
@@ -1414,3 +1421,6 @@ Index: renesas-backport.v0/arch/arm/mach-shmobile/board-porter-reference.c
 +	.restart	= porter_restart,
 +	.dt_compat	= porter_boards_compat_dt,
 +MACHINE_END
+-- 
+1.9.1
+
