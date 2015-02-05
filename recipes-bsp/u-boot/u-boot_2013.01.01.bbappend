@@ -4,6 +4,7 @@ SRC_URI_append = " \
 	file://0001-uboot-Silk-board-support.patch \
 	file://0002-uboot-net-sh-eth-Remove-definition-of-RX_DESC_SIZE-and-TX_.patch \
 	file://0003-uboot-net-sh-eth-Use-memalign-instead-of-orignal-memroy-al.patch \
+	file://0004-uboot-porter-board-support.patch \
 "
 
 COMPATIBLE_MACHINE = "(silk|porter)"
