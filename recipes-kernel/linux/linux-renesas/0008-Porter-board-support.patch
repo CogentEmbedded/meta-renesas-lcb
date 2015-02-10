@@ -554,11 +554,11 @@ index 0000000..d481ecd
 +
 +static struct rcar_du_crtc_data porter_du_crtcs[] = {
 +	{
-+		.exclk = 148500000,
++		.exclk = 0, /* NoP */
 +		.init_conn_type = DRM_MODE_CONNECTOR_LVDS,
 +	},
 +	{
-+		.exclk = 74250000,
++		.exclk = 0, /* NoP */
 +		.init_conn_type = DRM_MODE_CONNECTOR_HDMIA,
 +	},
 +};
