@@ -1087,7 +1087,7 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
 +++ u-boot-sh.3/board/renesas/silk/silk.c	2014-12-20 20:10:29.802016281 +0300
-@@ -0,0 +1,301 @@
+@@ -0,0 +1,318 @@
 +/*
 + * board/renesas/silk/silk.c
 + *     This file is silk board support.
@@ -1202,6 +1202,14 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 +	return 0;
 +}
 +
++/* LSI pin pull-up control */
++#define PUPR3		0xe606010C
++#define PUPR3_ETH	0x007FF800
++#define PUPR3_ETH_MAGIC	(1 << 20)
++
++#define PUPR1		0xe6060104
++#define PUPR1_DREQ0_N	(1 << 20)
++
 +int board_init(void)
 +{
 +	u32 val;
@@ -1227,6 +1235,10 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 +	gpio_request(GPIO_FN_ETH_MDC, NULL);
 +	gpio_request(GPIO_FN_IRQ8, NULL);
 +
++	val = readl(PUPR3);
++	val &= ~(PUPR3_ETH & ~PUPR3_ETH_MAGIC);
++	writel(val, PUPR3);
++
 +#ifdef CONFIG_SH_SDHI
 +	gpio_request(GPIO_FN_SD1_DATA0, NULL);
 +	gpio_request(GPIO_FN_SD1_DATA1, NULL);
@@ -1240,6 +1252,11 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 +	sh_timer_init();
 +
 +	gpio_request(GPIO_GP_1_24, NULL);	/* PHY_RST */
++
++	val = readl(PUPR1);
++	val &= ~PUPR1_DREQ0_N;
++	writel(val, PUPR1);
++
 +	gpio_direction_output(GPIO_GP_1_24, 0);
 +	mdelay(20);
 +	gpio_set_value(GPIO_GP_1_24, 1);
