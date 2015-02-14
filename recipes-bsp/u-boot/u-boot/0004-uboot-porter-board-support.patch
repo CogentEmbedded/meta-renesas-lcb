@@ -163,7 +163,7 @@ new file mode 100644
 index 0000000..e6ded08
 --- /dev/null
 +++ b/board/renesas/porter/porter.c
-@@ -0,0 +1,308 @@
+@@ -0,0 +1,305 @@
 +/*
 + * board/renesas/porter/porter.c
 + *     This file is Porter board support.
@@ -229,9 +229,6 @@ index 0000000..e6ded08
 +#define SDHI2_MSTP311	(1 << 11)
 +#define SCIF0_MSTP721	(1 << 21)
 +#define ETHER_MSTP813	(1 << 13)
-+
-+#define SD1CKCR		0xE6150078
-+#define SD1_97500KHZ	0x7
 +
 +#define SD2CKCR		0xE615026C
 +#define SD2_97500KHZ	0x7
@@ -2977,7 +2974,7 @@ new file mode 100644
 index 0000000..0d68248
 --- /dev/null
 +++ b/include/configs/porter.h
-@@ -0,0 +1,213 @@
+@@ -0,0 +1,206 @@
 +/*
 + * include/configs/porter.h
 + *     This file is Porter board configuration.
@@ -3171,16 +3168,9 @@ index 0000000..0d68248
 +#define CONFIG_USB_EHCI_R8A779x
 +#define CONFIG_USB_MAX_CONTROLLER_COUNT	2
 +
-+/* MMCIF */
++/* SD */
 +#define CONFIG_MMC			1
 +#define CONFIG_GENERIC_MMC		1
-+
-+#define CONFIG_SH_MMCIF			1
-+#define CONFIG_SH_MMCIF_ADDR		0xee200000      /* ch0 */
-+#define CONFIG_SH_MMCIF_CLK		48000000
-+#define CONFIG_SH_MMCIF_FREQ		100000000
-+
-+/* SD */
 +#define CONFIG_SH_SDHI			1
 +#define CONFIG_SH_SDHI_FREQ		97500000
 +#define CONFIG_MMC_SH_SDHI_NR_CHANNEL	3
