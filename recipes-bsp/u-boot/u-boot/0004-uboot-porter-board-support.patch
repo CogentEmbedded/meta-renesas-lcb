@@ -218,7 +218,7 @@ index 0000000..e6ded08
 +	val |= 0x4A000000;	/* 1.5GHz */
 +	writel(val, PLL0CR);
 +
-+#if defined(CONFIG_EXTRAM_BOOT)
++#if !defined(CONFIG_EXTRAM_BOOT)
 +	/* QoS */
 +	qos_init();
 +#endif
