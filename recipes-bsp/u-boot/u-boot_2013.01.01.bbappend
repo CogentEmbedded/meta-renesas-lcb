@@ -6,6 +6,7 @@ SRC_URI_append = " \
 	file://0003-uboot-net-sh-eth-Use-memalign-instead-of-orignal-memroy-al.patch \
 	file://0004-uboot-porter-board-support.patch \
 	file://0005-uboot-serial-sh-SCIF-internal-clock-support.patch \
+	file://0006-uboot-Silk-disable-dcache-until-fixed.patch \
 "
 
 COMPATIBLE_MACHINE = "(silk|porter)"
