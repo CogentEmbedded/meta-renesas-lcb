@@ -1264,7 +1264,7 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 +
 +	/* mmc0 */
 +	gpio_request(GPIO_GP_4_31, NULL);
-+	gpio_set_value(GPIO_GP_4_31, 1);
++	gpio_direction_output(GPIO_GP_4_31, 1);
 +	/* sdhi1 */
 +	gpio_request(GPIO_GP_4_26, NULL);
 +	gpio_request(GPIO_GP_4_29, NULL);
