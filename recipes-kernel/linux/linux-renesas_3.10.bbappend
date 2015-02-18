@@ -12,5 +12,9 @@ SRC_URI_append = " \
 	file://0007-SILK-add-i2c0.patch \
 	file://0008-Porter-board-support.patch \
 	file://0009-shmobile-add-atag-dtb-compat.patch \
+	file://rcar-gen2-1.9.0-backports/0001-pinctrl-sh-pfc-r8a7794-Add-IRQ8-pin-groups.patch \
+	file://rcar-gen2-1.9.0-backports/0002-pinctrl-sh-pfc-r8a7794-Add-EtherB-pins-to-Ethernet-p.patch \
+	file://rcar-gen2-1.9.0-backports/0003-pinctrl-sh-pfc-r8a7794-Add-SSI-pin-groups.patch \
+	file://rcar-gen2-1.9.0-backports/0004-pinctrl-sh-pfc-r8a7794-Add-audio_clk-pin-groups.patch \
 "
 
