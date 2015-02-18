@@ -16,5 +16,8 @@ SRC_URI_append = " \
 	file://rcar-gen2-1.9.0-backports/0002-pinctrl-sh-pfc-r8a7794-Add-EtherB-pins-to-Ethernet-p.patch \
 	file://rcar-gen2-1.9.0-backports/0003-pinctrl-sh-pfc-r8a7794-Add-SSI-pin-groups.patch \
 	file://rcar-gen2-1.9.0-backports/0004-pinctrl-sh-pfc-r8a7794-Add-audio_clk-pin-groups.patch \
+	file://0010-Silk-Add-missing-pins-handle-to-Eth.patch \
+	file://0011-Silk-Add-missing-DU-pins.patch \
+
 "
 
