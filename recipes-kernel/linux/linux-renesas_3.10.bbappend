@@ -18,13 +18,15 @@ SRC_URI_append = " \
 	file://rcar-gen2-1.9.0-backports/0004-pinctrl-sh-pfc-r8a7794-Add-audio_clk-pin-groups.patch \
 	file://0010-Silk-Add-missing-pins-handle-to-Eth.patch \
 	file://0011-Silk-Add-missing-DU-pins.patch \
-        file://0012-can-add-Renesas-R-Car-CAN-driver.patch \
-        file://0013-sh-pfc-r8a7791-add-CAN-pin-groups.patch \
-        file://0014-sh-pfc-r8a7791-fix-CAN-pin-groups.patch \
-        file://0015-can-rcar_can-support-all-input-clocks.patch \
-        file://0016-can-rcar_can-document-device-tree-bindings.patch \
-        file://0017-can-rcar_can-add-device-tree-support.patch \
-        file://0018-porter-can-support.patch \
+	file://0012-can-add-Renesas-R-Car-CAN-driver.patch \
+	file://0013-sh-pfc-r8a7791-add-CAN-pin-groups.patch \
+	file://0014-sh-pfc-r8a7791-fix-CAN-pin-groups.patch \
+	file://0015-can-rcar_can-support-all-input-clocks.patch \
+	file://0016-can-rcar_can-document-device-tree-bindings.patch \
+	file://0017-can-rcar_can-add-device-tree-support.patch \
+	file://0018-porter-can-support.patch \
+	file://0019-i2c-busses-rcar-Workaround-arbitration-loss-error.patch \
+	file://0020-Silk-Remove-I2C1-clock-from-clk_enables.patch \
 "
 
 do_configure_append_porter() {
