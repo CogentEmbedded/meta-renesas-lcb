@@ -1145,7 +1145,7 @@ Index: u-boot-sh.3/board/renesas/silk/silk.c
 +	 * on Cortex-A7 MPCore
 +	 */
 +	asm volatile(
-+		"mrc	15, 0, r0, c1, c0, 1\n"		/* read ACTLR */
++		"mrc	p15, 0, r0, c1, c0, 1\n"	/* read ACTLR */
 +		"orr	r0, r0, #(1 << 6)\n"		/* set SMP */
 +		"mcr	p15, 0, r0, c1, c0, 1\n");	/* write ACTLR */
 +#endif
