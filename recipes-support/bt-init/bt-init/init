@@ -1,0 +1,41 @@
+#!/bin/sh
+# 
+### BEGIN INIT INFO
+# Provides: mm
+# Default-Start:     2 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+case "$1" in
+"start")
+	# Enable BT_REG_ON
+	echo 846 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio846/direction
+	echo 1 > /sys/class/gpio/gpio846/value
+	# Enable BT_WAKE_DEV (optional)
+	echo 850 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio850/direction
+	echo 1 > /sys/class/gpio/gpio850/value
+	# Start Bluetooth HCI
+	# bcm2035 device type allows switching
+	# transfer speed up to 921600 baud
+	hciattach -n -s 115200 /dev/ttySC8 bcm2035 921600 flow &
+        ;;
+stop)
+	# Stop Bluetooth HCI
+	killall hciattach
+	# Free GPIOs
+	echo 0 > /sys/class/gpio/gpio850/value
+	echo 0 > /sys/class/gpio/gpio846/value
+	echo 850 > /sys/class/gpio/unexport
+	echo 846 > /sys/class/gpio/unexport	
+        ;;
+reload|restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+*)
+        echo "usage: $0 { start | stop | restart }"
+        ;;
+esac

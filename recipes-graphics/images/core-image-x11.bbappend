@@ -7,3 +7,7 @@ IMAGE_INSTALL_append_rcar-gen2 = "\
     can-utils \
     libsocketcan \
 "
+
+IMAGE_INSTALL_append_silk = "\
+    bt-init \
+"
