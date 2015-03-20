@@ -1,0 +1,86 @@
+From 18f36377fca973c28fa3d32835eb7cc11cca1b77 Mon Sep 17 00:00:00 2001
+From: Mikhail Ulyanov <mikhail.ulyanov@cogentembedded.com>
+Date: Wed, 11 Feb 2015 16:16:35 +0300
+Subject: [PATCH] ARM: shmobile: silk: Add flow control support to SCIF
+
+This adds flow control support to SCIF platform data
+and enables flow control for HSCIF0 as it's needed
+for the Bluetooth module attached to it.
+
+Signed-off-by: Mikhail Ulyanov <mikhail.ulyanov@cogentembedded.com>
+Signed-off-by: Valentine Barshak <valentine.barshak@cogentembedded.com>
+---
+ arch/arm/mach-shmobile/board-silk-reference.c | 49 ++++++++++++++-------------
+ 1 file changed, 25 insertions(+), 24 deletions(-)
+
+diff --git a/arch/arm/mach-shmobile/board-silk-reference.c b/arch/arm/mach-shmobile/board-silk-reference.c
+index d4c64fa..8ee9748 100644
+--- a/arch/arm/mach-shmobile/board-silk-reference.c
++++ b/arch/arm/mach-shmobile/board-silk-reference.c
+@@ -434,38 +434,39 @@ static struct sh_mobile_sdhi_info sdhi1_info __initdata = {
+ };
+ 
+ /* SCIF */
+-#define SCIF_PD(scif_type, index, scif_index)				\
++#define SCIF_PD(scif_type, index, scif_index, cap)				\
+ static struct plat_sci_port scif##index##_platform_data = {	\
+ 	.type		= PORT_##scif_type,			\
+ 	.flags		= UPF_BOOT_AUTOCONF | UPF_IOREMAP,	\
+ 	.scscr		= SCSCR_RE | SCSCR_TE,			\
+ 	.dma_slave_tx	= SYS_DMAC_SLAVE_##scif_type##scif_index##_TX,	\
+ 	.dma_slave_rx	= SYS_DMAC_SLAVE_##scif_type##scif_index##_RX,	\
++	.capabilities	= cap,					\
+ }
+ 
+-#define PDATA_SCIF(index, baseaddr, irq, i) SCIF_PD(SCIF, index, i)
+-#define PDATA_SCIFA(index, baseaddr, irq, i) SCIF_PD(SCIFA, index, i)
+-#define PDATA_SCIFB(index, baseaddr, irq, i) SCIF_PD(SCIFB, index, i)
+-#define PDATA_HSCIF(index, baseaddr, irq, i) SCIF_PD(HSCIF, index, i)
+-
+-PDATA_SCIFA(0,  0xe6c40000, gic_spi(144), 0); /* SCIFA0 */
+-PDATA_SCIFA(1,  0xe6c50000, gic_spi(145), 1); /* SCIFA1 */
+-PDATA_SCIFB(2,  0xe6c20000, gic_spi(148), 0); /* SCIFB0 */
+-PDATA_SCIFB(3,  0xe6c30000, gic_spi(149), 1); /* SCIFB1 */
+-PDATA_SCIFB(4,  0xe6ce0000, gic_spi(150), 2); /* SCIFB2 */
+-PDATA_SCIFA(5,  0xe6c60000, gic_spi(151), 2); /* SCIFA2 */
+-PDATA_SCIF(6,   0xe6e60000, gic_spi(152), 0); /* SCIF0 */
+-PDATA_SCIF(7,   0xe6e68000, gic_spi(153), 1); /* SCIF1 */
+-PDATA_HSCIF(8,  0xe62c0000, gic_spi(154), 0); /* HSCIF0 */
+-PDATA_HSCIF(9,  0xe62c8000, gic_spi(155), 1); /* HSCIF1 */
+-PDATA_SCIF(10,  0xe6e58000, gic_spi(22), 2); /* SCIF2 */
+-PDATA_SCIF(11,  0xe6ea8000, gic_spi(23), 3); /* SCIF3 */
+-PDATA_SCIF(12,  0xe6ee0000, gic_spi(24), 4); /* SCIF4 */
+-PDATA_SCIF(13,  0xe6ee8000, gic_spi(25), 5); /* SCIF5 */
+-PDATA_SCIFA(14, 0xe6c70000, gic_spi(29), 3); /* SCIFA3 */
+-PDATA_SCIFA(15, 0xe6c78000, gic_spi(30), 4); /* SCIFA4 */
+-PDATA_SCIFA(16, 0xe6c80000, gic_spi(31), 5); /* SCIFA5 */
+-PDATA_HSCIF(17, 0xe6cd0000, gic_spi(21), 2); /* HSCIF2 */
++#define PDATA_SCIF(index, baseaddr, irq, i, cap) SCIF_PD(SCIF, index, i, cap)
++#define PDATA_SCIFA(index, baseaddr, irq, i, cap) SCIF_PD(SCIFA, index, i, cap)
++#define PDATA_SCIFB(index, baseaddr, irq, i, cap) SCIF_PD(SCIFB, index, i, cap)
++#define PDATA_HSCIF(index, baseaddr, irq, i, cap) SCIF_PD(HSCIF, index, i, cap)
++
++PDATA_SCIFA(0,  0xe6c40000, gic_spi(144), 0, 0); /* SCIFA0 */
++PDATA_SCIFA(1,  0xe6c50000, gic_spi(145), 1, 0); /* SCIFA1 */
++PDATA_SCIFB(2,  0xe6c20000, gic_spi(148), 0, 0); /* SCIFB0 */
++PDATA_SCIFB(3,  0xe6c30000, gic_spi(149), 1, 0); /* SCIFB1 */
++PDATA_SCIFB(4,  0xe6ce0000, gic_spi(150), 2, 0); /* SCIFB2 */
++PDATA_SCIFA(5,  0xe6c60000, gic_spi(151), 2, 0); /* SCIFA2 */
++PDATA_SCIF(6,   0xe6e60000, gic_spi(152), 0, 0); /* SCIF0 */
++PDATA_SCIF(7,   0xe6e68000, gic_spi(153), 1, 0); /* SCIF1 */
++PDATA_HSCIF(8,  0xe62c0000, gic_spi(154), 0, SCIx_HAVE_RTSCTS); /* HSCIF0 */
++PDATA_HSCIF(9,  0xe62c8000, gic_spi(155), 1, 0); /* HSCIF1 */
++PDATA_SCIF(10,  0xe6e58000, gic_spi(22), 2, 0); /* SCIF2 */
++PDATA_SCIF(11,  0xe6ea8000, gic_spi(23), 3, 0); /* SCIF3 */
++PDATA_SCIF(12,  0xe6ee0000, gic_spi(24), 4, 0); /* SCIF4 */
++PDATA_SCIF(13,  0xe6ee8000, gic_spi(25), 5, 0); /* SCIF5 */
++PDATA_SCIFA(14, 0xe6c70000, gic_spi(29), 3, 0); /* SCIFA3 */
++PDATA_SCIFA(15, 0xe6c78000, gic_spi(30), 4, 0); /* SCIFA4 */
++PDATA_SCIFA(16, 0xe6c80000, gic_spi(31), 5, 0); /* SCIFA5 */
++PDATA_HSCIF(17, 0xe6cd0000, gic_spi(21), 2, 0); /* HSCIF2 */
+ 
+ #define SCIF_AD(scif_type, index, baseaddr)		\
+ 	OF_DEV_AUXDATA("renesas," scif_type "-r8a7794", baseaddr, \
+-- 
+1.9.3
+

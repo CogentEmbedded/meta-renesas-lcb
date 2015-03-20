@@ -28,6 +28,10 @@ SRC_URI_append = " \
 	file://0019-i2c-busses-rcar-Workaround-arbitration-loss-error.patch \
 	file://0020-Silk-Remove-I2C1-clock-from-clk_enables.patch \
 	file://0021-r8a7791-r8a7794-rcar_du-Set-interlace-to-false-by-de.patch \
+	file://0022-Silk-dts-Add-HSCIF0-support.patch \
+	file://0023-Silk-Add-flow-control-support-to-SCIF.patch \
+	file://0024-shmobile-defconfig-Enable-SCI-DMA-support.patch \
+	file://0025-shmobile-defconfig-Enable-Bluetooth.patch \
 "
 
 do_configure_append_porter() {
